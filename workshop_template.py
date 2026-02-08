@@ -73,7 +73,7 @@ ACCESS_TOKEN = ""  # Replace with your access token
 ORG_ID = ""  # Replace with your organization IDKey
 
 # Claim code for subscription
-CLAIM_CODE = "WKGZ-NXNZ-MGTK-NPPN"  # Replace with your claim code
+CLAIM_CODE = ""  # Replace with your claim code
 
 # Users to invite (list of user details with email, first name, and last name)
 USERS_TO_INVITE = [
