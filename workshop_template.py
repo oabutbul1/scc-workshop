@@ -67,9 +67,7 @@ from scc_sdk import Client, SCCError
 # ============================================================================
 
 # Security Cloud Control credentials
-ACCESS_TOKEN = ""  # Replace with your access token
-
-# Organization ID
+ACCESS_TOKEN = "" # Replace with your API key access token
 ORG_ID = ""  # Replace with your organization IDKey
 
 # Claim code for subscription
@@ -85,8 +83,6 @@ USERS_TO_INVITE = [
 ]
 
 
-
-
 def get_organization_details(client):
     """Fetch and display organization details.
     
@@ -97,10 +93,10 @@ def get_organization_details(client):
     print("=" * 80)
 
     # TODO: Use the client to get organization details
-    # org = client.organizations.get(org_id=ORG_ID)
+    org = client.organizations.get(org_id=ORG_ID)
     
     # TODO: Print the organization details
-    # client.organizations.print_details(org)
+    client.organizations.print_details(org)
     
     return org
 
@@ -115,24 +111,22 @@ def claim_subscriptions(client):
     print("=" * 80)
     
     # TODO: List existing subscriptions for the organization
-    # subs_list = client.subscriptions.list(org_id=ORG_ID)
+    subs_list = client.subscriptions.list(org_id=ORG_ID)
     
     # TODO: Print the count of existing subscriptions
     print(f"  Found {len(subs_list)} existing subscription(s)")
         
     print("\nSTEP 2.2: Reading claim code details...")
     print("=" * 80)
-    print(f"  Claim Code: {CLAIM_CODE}")
-    
     try:
         # TODO: Read the claim code details
-        # claim_info = client.subscriptions.read_claim_code(org_id=ORG_ID, claim_code=CLAIM_CODE)
+        claim_info = client.subscriptions.read_claim_code(org_id=ORG_ID, claim_code=CLAIM_CODE)
         
         # TODO: Print the claim information
-        # client.subscriptions.print_claim_info(claim_info)
+        client.subscriptions.print_claim_info(claim_info)
         
         # Claim the subscription with the claim info
-        # claim_single_subscription(client, CLAIM_CODE, "Subscription", claim_info)
+        claim_single_subscription(client, CLAIM_CODE, "Subscription", claim_info)
     except SCCError as e:
         print(f"  ✗ Failed to read claim code: {e}")
         print("  Skipping subscription claim due to error reading claim code.")
@@ -147,7 +141,7 @@ def claim_single_subscription(client, claim_code, name, claim_info):
     print(f"  Claim Code: {claim_code}")
     
     # TODO: Build products list from claim_info using helper method
-    # products = client.subscriptions.build_products_from_claim_info(claim_info)
+    products = client.subscriptions.build_products_from_claim_info(claim_info)
     
     # Print selected products and regions
     for i, product in enumerate(products):
@@ -158,7 +152,7 @@ def claim_single_subscription(client, claim_code, name, claim_info):
     # Create subscription using the claim code and products
     try:
         # TODO: Create the subscription
-        #result = client.subscriptions.create(org_id=ORG_ID, claim_code=CLAIM_CODE, products=products)
+        result = client.subscriptions.create(org_id=ORG_ID, claim_code=CLAIM_CODE, products=products)
         
         print(f"✓ {name} subscription claimed successfully")
         if result:
@@ -184,13 +178,12 @@ def invite_users(client):
     for user_info in USERS_TO_INVITE:
         try:
             # TODO: Invite the user using the client
-            # result = client.users.invite(
-            #     org_id=ORG_ID,
-            #    email=user_info['email'],
-            #     first_name=user_info['first_name'],
-            #     last_name=user_info['last_name']
-            # )
-            
+            client.users.invite(
+                 org_id=ORG_ID,
+                 email=user_info['email'],
+                 first_name=user_info['first_name'],
+                 last_name=user_info['last_name']
+             )
             print(f"  ✓ {user_info['first_name']} {user_info['last_name']} ({user_info['email']})")
             invited_count += 1
         except SCCError as e:
@@ -199,16 +192,11 @@ def invite_users(client):
     print(f"\n✓ Successfully invited {invited_count}/{len(USERS_TO_INVITE)} users")
     
     print("\nListing current users in organization:")
-    
-    # Check SCC UI to see invited users status
     # TODO: List all users in the organization
-    # users_result = client.users.list(org_id=ORG_ID)
-    
-    # TODO: Get the users array from the result
-    # current_users = users_result.get("users", [])
-    
+    users_result = client.users.list(org_id=ORG_ID)
+        
     # TODO: Print the count of total users
-    print(f"  Found {len(current_users)} total users")
+    print(f"  Found {len(users_result.get("users", []))} total users")
 
 
 def create_admin_group(client, name="Products Admin Group", description="Administrative group for managing Cisco security products"):
@@ -223,11 +211,11 @@ def create_admin_group(client, name="Products Admin Group", description="Adminis
     
     try:
         # TODO: Create the admin group
-      #  products_admin_group = client.groups.create(
-      #       org_id= ORG_ID,
-      #       name=name,
-      #       description=description
-      #   )
+        products_admin_group = client.groups.create(
+             org_id= ORG_ID,
+             name=name,
+             description=description
+         )
         
         # TODO: Get the group ID from the response
         group_id = products_admin_group.get("id")
@@ -235,7 +223,7 @@ def create_admin_group(client, name="Products Admin Group", description="Adminis
         print(f"✓ {name} created successfully")
         
         # TODO: Print the group details
-      #  client.groups.print_details(products_admin_group)
+        client.groups.print_details(products_admin_group)
         
         # TODO: Return the group_id
         return group_id
@@ -243,21 +231,6 @@ def create_admin_group(client, name="Products Admin Group", description="Adminis
     except SCCError as e:
         print(f"✗ Failed to create {name}: {e}")
         print(f"\nAttempting to find existing {name}...")
-        
-        # TODO: List all groups to find if the group already exists
-        groups_result = client.groups.list(org_id=ORG_ID)
-        
-        # TODO: Get the groups array
-        groups = groups_result.get("groups", [])
-        
-        for group in groups:
-            if group.get("name") == name:
-                group_id = group.get("id")
-                print(f"✓ Found existing {name}")
-                client.groups.print_details(group)
-                return group_id
-        
-        print(f"✗ Could not create or find {name}")
         return None
 
 
@@ -282,11 +255,11 @@ def add_users_to_group(client, group_id, user_emails):
     
     try:
         # TODO: Patch the group to add users
-     #   result = client.groups.patch(
-     #        org_id=ORG_ID,
-     #        group_id=group_id,
-     #        users=user_operations
-     #    )
+        result = client.groups.patch(
+             org_id=ORG_ID,
+             group_id=group_id,
+             users=user_operations
+         )
         
         print(f"✓ Successfully added users to group")
         for email in user_emails:
@@ -296,9 +269,6 @@ def add_users_to_group(client, group_id, user_emails):
     except SCCError as e:
         print(f"✗ Failed to add users to group: {e}")
         return None
-
-
-
 
 
 def print_summary(org, group_id):
