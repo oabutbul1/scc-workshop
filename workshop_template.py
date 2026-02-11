@@ -38,11 +38,10 @@ Step 4 – Create API Key
 Step 5 – Copy Claim Code
     Copy the claim code provided to you and paste it into the CLAIM_CODE variable in this template
 
-Step 6 – Open VS Code and Install SDK
-    1. Open VS Code
-    2. Open the terminal in VS Code
-    3. Install the Security Cloud Control SDK by running:
-       pip install -e .
+Step 6 - Run the workshop template 
+    python3 workshop_template.py
+
+Step 7 - verify the results in Security Cloud Control UI - https://security.cisco.com/
 
 WORKSHOP EXERCISES:
 
@@ -53,11 +52,9 @@ You will implement the following workflow steps:
 4. Creating admin groups
 5. Adding users to groups
 
-INSTRUCTIONS:
-- Search for "TODO:" comments to find where you need to add code
-- Simply delete the TODO comment lines to reveal the working code
-- Reference the API Reference section in README.md for complete method documentation
-- Estimated completion time: 30 minutes
+*** BONUS *** Implement the following (OPTIONAL)
+	6.	Update Organization name
+	7.	Remove User from Organization
 """
 
 from scc_sdk import Client, SCCError
@@ -270,6 +267,17 @@ def add_users_to_group(client, group_id, user_emails):
         print(f"✗ Failed to add users to group: {e}")
         return None
 
+def update_organization_name(client, new_name):
+    """Update the organization name."""
+    print("=" * 70)
+    print("\nBONUS: Updating Organization Name")
+    # update_organization_name - https://github.com/CiscoDevNet/cisco-scc-python-sdk?tab=readme-ov-file#updateorg_id-name
+
+def remove_user_from_organization(client, user_email = "member1@cl-workshop.com"):
+    """Remove a user from the organization."""
+    print("=" * 70)
+    print("\nBONUS: Removing User from Organization")
+    # remove_user_from_organization - https://github.com/CiscoDevNet/cisco-scc-python-sdk?tab=readme-ov-file#removeorg_id-email
 
 def print_summary(org, group_id):
     """Print the setup summary."""
@@ -290,7 +298,6 @@ def print_summary(org, group_id):
     print(f"  - Admin users added to group")
     
     print("\nOrganization Setup Successfully Completed!")
-
 
 def main():
     """Execute the organization setup workflow."""
@@ -314,7 +321,9 @@ def main():
         
         # EXERCISE 4: Create admin group
         group_id = create_admin_group(client)
-        
+
+        remove_user_from_organization(client)
+
         if not group_id:
             print("\n✗ Failed to create or find admin group. Exiting...")
             return
